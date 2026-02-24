@@ -3,9 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { studentId: string } }
+  context: { params: Promise<{ studentId: string }> }
 ) {
-  const { studentId } = params;
+  const { studentId } = await context.params;
 
   const { data, error } = await supabase
     .from("grades")
@@ -16,7 +16,10 @@ export async function GET(
     .eq("student_id", studentId);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json(data);
