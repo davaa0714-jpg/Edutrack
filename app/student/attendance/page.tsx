@@ -6,13 +6,14 @@ import { Attendance, Subject } from '@/types';
 import { useI18n } from '@/lib/i18n';
 import AppSidebar from '@/app/components/AppSidebar';
 
-type AttendanceWithSubject = Attendance & { subjects?: { name: string } | null };
+type AttendanceWithSubject = Attendance & { subjects?: { name: string }[] | null };
 
 export default function StudentAttendancePage() {
   const { t } = useI18n();
   const router = useRouter();
   const [attendance, setAttendance] = useState<AttendanceWithSubject[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
+  type SubjectOption = Pick<Subject, 'id' | 'name'>;
+  const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [subjectId, setSubjectId] = useState('');
   const [status, setStatus] = useState<'present' | 'absent' | 'late'>('present');
 
@@ -35,7 +36,9 @@ export default function StudentAttendancePage() {
         .from('enrollments')
         .select('subjects(id, name)')
         .eq('student_id', userId);
-      const list = (enrollments || []).map((e) => e.subjects).filter(Boolean) as Subject[];
+      const list = (enrollments || [])
+        .flatMap((e) => (Array.isArray(e.subjects) ? e.subjects : e.subjects ? [e.subjects] : []))
+        .filter((s): s is SubjectOption => typeof s.id === 'number' && typeof s.name === 'string');
       setSubjects(list);
     };
     load();
@@ -94,7 +97,7 @@ export default function StudentAttendancePage() {
               <tbody>
                 {attendance.map((a) => (
                   <tr key={a.id} className="border-t border-[color:var(--card-border)] zebra">
-                    <td className="px-4 py-3">{a.subjects?.name || t('unknown')}</td>
+                    <td className="px-4 py-3">{a.subjects?.[0]?.name || t('unknown')}</td>
                     <td className="px-4 py-3">{a.status}</td>
                     <td className="px-4 py-3">{a.date}</td>
                   </tr>
@@ -107,3 +110,5 @@ export default function StudentAttendancePage() {
     </div>
   );
 }
+
+

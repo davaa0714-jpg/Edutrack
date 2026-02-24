@@ -6,7 +6,7 @@ import { Class, Schedule, Subject } from '@/types';
 import { useI18n } from '@/lib/i18n';
 import AppSidebar from '@/app/components/AppSidebar';
 
-type ScheduleWithMeta = Schedule & { subjects?: { name: string } | null; classes?: { name: string } | null };
+type ScheduleWithMeta = Schedule & { subjects?: { name: string }[] | null; classes?: { name: string }[] | null };
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function AdminSchedulePage() {
@@ -106,8 +106,8 @@ export default function AdminSchedulePage() {
             {items.map((s) => (
               <div key={s.id} className="soft-panel soft-panel-muted">
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold">{s.subjects?.name || t('unknown')}</p>
-                  <span className="tag">{s.classes?.name || '-'}</span>
+                  <p className="font-semibold">{s.subjects?.[0]?.name || t('unknown')}</p>
+                  <span className="tag">{s.classes?.[0]?.name || '-'}</span>
                 </div>
                 <p className="text-sm text-muted">{days[(s.day_of_week || 1) - 1]} · {s.start_time} - {s.end_time} · {s.room || 'Room'}</p>
               </div>
@@ -118,3 +118,4 @@ export default function AdminSchedulePage() {
     </div>
   );
 }
+

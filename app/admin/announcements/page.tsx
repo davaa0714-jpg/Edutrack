@@ -81,7 +81,7 @@ export default function AdminAnnouncementsPage() {
               <div key={a.id} className="soft-panel soft-panel-muted">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{a.title}</p>
-                  <span className="tag">{a.classes?.name || 'All classes'}</span>
+                  <span className="tag">{a.classes?.[0]?.name || 'All classes'}</span>
                 </div>
                 {a.body && <p className="text-sm text-muted">{a.body}</p>}
               </div>
@@ -92,3 +92,4 @@ export default function AdminAnnouncementsPage() {
     </div>
   );
 }
+

@@ -6,7 +6,7 @@ import { Grade } from '@/types';
 import { useI18n } from '@/lib/i18n';
 import AppSidebar from '@/app/components/AppSidebar';
 
-type GradeWithSubject = Grade & { subjects?: { name: string } | null };
+type GradeWithSubject = Grade & { subjects?: { name: string }[] | null };
 
 export default function StudentGradesPage() {
   const { t } = useI18n();
@@ -49,7 +49,7 @@ export default function StudentGradesPage() {
               <tbody>
                 {grades.map((g) => (
                   <tr key={g.id} className="border-t border-[color:var(--card-border)] zebra">
-                    <td className="px-4 py-3">{g.subjects?.name || t('unknown')}</td>
+                    <td className="px-4 py-3">{g.subjects?.[0]?.name || t('unknown')}</td>
                     <td className="px-4 py-3">{g.score}</td>
                     <td className="px-4 py-3">{new Date(g.created_at).toLocaleDateString()}</td>
                   </tr>
@@ -62,3 +62,4 @@ export default function StudentGradesPage() {
     </div>
   );
 }
+

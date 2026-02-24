@@ -142,7 +142,7 @@ export default function AdminDashboardPage() {
                         <input
                           className="input-field"
                           defaultValue={u.full_name || ''}
-                          onBlur={(e) => updateField(u.id, { full_name: e.target.value || null })}
+                          onBlur={(e) => updateField(u.id, { full_name: e.target.value.trim() || '' })}
                         />
                       </td>
                       <td className="px-4 py-3">
@@ -185,3 +185,4 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+

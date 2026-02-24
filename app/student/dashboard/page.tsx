@@ -7,11 +7,11 @@ import { useI18n } from '@/lib/i18n';
 import AppSidebar from '@/app/components/AppSidebar';
 import ToggleGroup from '@/app/components/ToggleGroup';
 
-type GradeWithSubject = Grade & { subjects?: { name: string } | null };
-type AttendanceWithSubject = Attendance & { subjects?: { name: string } | null };
+type GradeWithSubject = Grade & { subjects?: { name: string }[] | null };
+type AttendanceWithSubject = Attendance & { subjects?: { name: string }[] | null };
 type AnnouncementWithMeta = Announcement & {
-  classes?: { name: string } | null;
-  profiles?: { full_name: string } | null;
+  classes?: { name: string }[] | null;
+  profiles?: { full_name: string }[] | null;
 };
 
 export default function StudentDashboardPage() {
@@ -126,11 +126,11 @@ export default function StudentDashboardPage() {
                 <div key={a.id} className="soft-panel soft-panel-muted px-4 py-3 text-sm">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold">{a.title}</p>
-                    <span className="tag">{a.classes?.name || 'Buh angi'}</span>
+                    <span className="tag">{a.classes?.[0]?.name || 'Buh angi'}</span>
                   </div>
                   {a.body && <p className="mt-2 text-xs text-muted">{a.body}</p>}
                   <p className="mt-2 text-[11px] text-muted">
-                    {a.profiles?.full_name || 'Admin'} · {new Date(a.created_at).toLocaleDateString()}
+                    {a.profiles?.[0]?.full_name || 'Admin'} · {new Date(a.created_at).toLocaleDateString()}
                   </p>
                 </div>
               ))}
@@ -146,3 +146,4 @@ export default function StudentDashboardPage() {
     </div>
   );
 }
+

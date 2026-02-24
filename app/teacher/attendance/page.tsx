@@ -6,7 +6,7 @@ import { Attendance, Profile, Subject } from '@/types';
 import { useI18n } from '@/lib/i18n';
 import AppSidebar from '@/app/components/AppSidebar';
 
-type AttendanceWithSubject = Attendance & { subjects?: { name: string } | null };
+type AttendanceWithSubject = Attendance & { subjects?: { name: string }[] | null };
 
 export default function TeacherAttendancePage() {
   const { t } = useI18n();
@@ -100,7 +100,7 @@ export default function TeacherAttendancePage() {
                 {attendance.map((a) => (
                   <tr key={a.id} className="border-t border-[color:var(--card-border)] zebra">
                     <td className="px-4 py-3">{studentMap[a.student_id] || a.student_id}</td>
-                    <td className="px-4 py-3">{a.subjects?.name || t('unknown')}</td>
+                    <td className="px-4 py-3">{a.subjects?.[0]?.name || t('unknown')}</td>
                     <td className="px-4 py-3">{a.status}</td>
                     <td className="px-4 py-3">{a.date}</td>
                   </tr>
@@ -113,3 +113,4 @@ export default function TeacherAttendancePage() {
     </div>
   );
 }
+

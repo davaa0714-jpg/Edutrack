@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { Assignment, Subject } from '@/types';
 import AppSidebar from '@/app/components/AppSidebar';
 
-type AssignmentWithSubject = Assignment & { subjects?: { name: string } | null };
+type AssignmentWithSubject = Assignment & { subjects?: { name: string }[] | null };
 
 export default function AdminAssignmentsPage() {
   const router = useRouter();
@@ -79,7 +79,7 @@ export default function AdminAssignmentsPage() {
               <div key={a.id} className="soft-panel soft-panel-muted">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{a.title}</p>
-                  <span className="tag">{a.subjects?.name || '-'}</span>
+                  <span className="tag">{a.subjects?.[0]?.name || '-'}</span>
                 </div>
                 <p className="text-sm text-muted">Due: {a.due_date || 'TBD'}</p>
                 {a.description && <p className="text-sm text-muted">{a.description}</p>}
@@ -91,3 +91,4 @@ export default function AdminAssignmentsPage() {
     </div>
   );
 }
+
