@@ -4,9 +4,15 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Announcement, Class } from '@/types';
 import AppSidebar from '@/app/components/AppSidebar';
-
-type AnnouncementWithClass = Announcement & { classes?: { name: string } | null };
-
+type AnnouncementWithClass = {
+  id: string
+  title: string
+  body: string
+  created_by: string
+  target_class_id: string
+  created_at: string
+  classes?: { name: string }[] | null
+}
 export default function AdminAnnouncementsPage() {
   const router = useRouter();
   const [items, setItems] = useState<AnnouncementWithClass[]>([]);
