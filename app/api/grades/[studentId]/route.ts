@@ -1,0 +1,23 @@
+import { supabase } from "@/lib/supabase";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { studentId: string } }
+) {
+  const { studentId } = params;
+
+  const { data, error } = await supabase
+    .from("grades")
+    .select(`
+      id, score, subject_id,
+      subjects ( name )
+    `)
+    .eq("student_id", studentId);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
+}
