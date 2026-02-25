@@ -14,6 +14,15 @@ interface GradeWithSubject extends Grade {
   subjects: { name: string }[];
 }
 
+const getAttendanceStatusLabel = (status: Attendance['status']) => {
+  if (status === 'present') return '\u0418\u0440\u0441\u044d\u043d';
+  if (status === 'absent') return '\u0422\u0430\u0441\u0430\u043b\u0441\u0430\u043d';
+  if (status === 'late') return '\u0425\u043e\u0446\u043e\u0440\u0441\u043e\u043d';
+  if (status === 'sick') return '\u04e8\u0432\u0447\u0442\u044d\u0439';
+  if (status === 'excused') return '\u0427\u04e9\u043b\u04e9\u04e9\u0442\u044d\u0439';
+  return status;
+};
+
 export default function TeacherPanel() {
   const { t } = useI18n();
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -210,9 +219,9 @@ export default function TeacherPanel() {
                                 onChange={(ev) => handleAttendanceChange(e.student_id, ev.target.value as 'present' | 'absent' | 'late')}
                                 className="select-field w-28 px-3 py-2 text-sm"
                               >
-                                <option value="present">{t('present')}</option>
-                                <option value="absent">{t('absent')}</option>
-                                <option value="late">{t('late')}</option>
+                                <option value="present">{getAttendanceStatusLabel('present')}</option>
+                                <option value="absent">{getAttendanceStatusLabel('absent')}</option>
+                                <option value="late">{getAttendanceStatusLabel('late')}</option>
                               </select>
                             </td>
                           </tr>

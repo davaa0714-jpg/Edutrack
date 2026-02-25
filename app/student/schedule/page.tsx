@@ -43,9 +43,9 @@ export default function StudentSchedulePage() {
         <AppSidebar />
         <main className="dash-main">
           <h1 className="text-2xl font-semibold fade-up">{t('schedule')}</h1>
-          <div className="mt-6 space-y-3 fade-up delay-1">
+          <div className="mt-6 grid grid-cols-4 gap-3 fade-up delay-1">
             {items.map((s) => (
-              <div key={s.id} className="soft-panel soft-panel-muted">
+              <div key={s.id} className="soft-panel soft-panel-muted aspect-square min-h-0 p-3">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{s.subjects?.[0]?.name || t('unknown')}</p>
                   <span className="tag">{s.classes?.[0]?.name || 'Class'}</span>
@@ -55,7 +55,7 @@ export default function StudentSchedulePage() {
                 </p>
               </div>
             ))}
-            {items.length === 0 && <div className="soft-panel soft-panel-muted text-sm text-muted">{t('noSubjects')}</div>}
+            {items.length === 0 && <div className="soft-panel soft-panel-muted col-span-4 text-sm text-muted">{t('noSubjects')}</div>}
           </div>
         </main>
       </div>

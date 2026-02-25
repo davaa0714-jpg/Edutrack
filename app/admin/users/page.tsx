@@ -40,7 +40,6 @@ export default function AdminUsersPage() {
             <table className="min-w-full text-sm">
               <thead className="table-head">
                 <tr>
-                  <th className="px-4 py-3 text-left">{t('id')}</th>
                   <th className="px-4 py-3 text-left">{t('fullName')}</th>
                   <th className="px-4 py-3 text-left">Phone</th>
                   <th className="px-4 py-3 text-left">{t('role')}</th>
@@ -49,7 +48,6 @@ export default function AdminUsersPage() {
               <tbody>
                 {users.map((u) => (
                   <tr key={u.id} className="border-t border-[color:var(--card-border)] zebra">
-                    <td className="px-4 py-3 text-xs">{u.id}</td>
                     <td className="px-4 py-3">
                       <input
                         className="input-field"

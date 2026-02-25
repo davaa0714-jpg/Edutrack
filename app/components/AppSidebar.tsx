@@ -15,10 +15,12 @@ const roleItems: Record<string, Array<{ href: string; label: string; icon: Compo
   ],
   teacher: [
     { href: '/teacher/dashboard', label: 'Dashboard', icon: Icon.Home },
+    { href: '/teacher/students', label: 'Students', icon: Icon.Users },
     { href: '/teacher/grades', label: 'Grades', icon: Icon.Chart },
     { href: '/teacher/attendance', label: 'Attendance', icon: Icon.Calendar },
     { href: '/teacher/schedule', label: 'Schedule', icon: Icon.Calendar },
     { href: '/subjects', label: 'Subjects', icon: Icon.Book },
+    { href: '/profile', label: 'Profile', icon: Icon.Users },
   ],
   admin: [
     { href: '/admin/dashboard', label: 'Dashboard', icon: Icon.Home },
@@ -34,8 +36,13 @@ const roleItems: Record<string, Array<{ href: string; label: string; icon: Compo
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const root = pathname.split('/').filter(Boolean)[0] || 'student';
-  const items = roleItems[root] || roleItems.student;
+  const roleKey =
+    pathname.startsWith('/admin')
+      ? 'admin'
+      : pathname.startsWith('/teacher') || pathname.startsWith('/subjects')
+        ? 'teacher'
+        : 'student';
+  const items = roleItems[roleKey] || roleItems.student;
 
   return (
     <aside className="dash-sidebar">

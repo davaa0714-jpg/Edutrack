@@ -4,15 +4,20 @@ import { useEffect, useState } from 'react';
 type Theme = 'light' | 'dark';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return 'light';
-    const saved = localStorage.getItem('edutrack_theme') as Theme | null;
-    return saved === 'dark' ? 'dark' : 'light';
-  });
+  const [theme, setTheme] = useState<Theme>('light');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    const saved = localStorage.getItem('edutrack_theme') as Theme | null;
+    const next = saved === 'dark' ? 'dark' : 'light';
+    setTheme(next);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+  }, [mounted, theme]);
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -25,6 +30,7 @@ export default function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className="toggle-circle"
+      suppressHydrationWarning
       aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
       type="button"
     >

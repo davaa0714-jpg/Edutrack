@@ -6,7 +6,8 @@ import { Grade, Profile, Subject } from '@/types';
 import { useI18n } from '@/lib/i18n';
 import AppSidebar from '@/app/components/AppSidebar';
 
-type GradeWithSubject = Grade & { subjects?: { name: string }[] | null };
+type RelationName = { name: string } | { name: string }[] | null | undefined;
+type GradeWithSubject = Grade & { subjects?: RelationName };
 
 export default function TeacherGradesPage() {
   const { t } = useI18n();
@@ -18,6 +19,27 @@ export default function TeacherGradesPage() {
   const [subjectId, setSubjectId] = useState('');
   const [score, setScore] = useState('');
 
+  const formatStudentName = (student: Profile) =>
+    student.full_name || [student.first_name, student.last_name].filter(Boolean).join(' ') || student.phone || 'Student';
+
+  const getRelationName = (value: RelationName) => {
+    if (!value) return null;
+    if (Array.isArray(value)) return value[0]?.name || null;
+    return value.name || null;
+  };
+
+  const loadGrades = async (accessToken: string) => {
+    const res = await fetch('/api/teacher/grades', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (res.ok && Array.isArray(payload.grades)) {
+      setGrades(payload.grades as GradeWithSubject[]);
+    } else {
+      setGrades([]);
+    }
+  };
+
   useEffect(() => {
     const load = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -26,21 +48,28 @@ export default function TeacherGradesPage() {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single();
       if (profile?.role !== 'teacher') return router.replace('/dashboard');
 
-      const { data: studentsData } = await supabase.from('profiles').select('*').eq('role', 'student');
-      if (studentsData) setStudents(studentsData);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (accessToken) {
+        const res = await fetch('/api/teacher/students', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (res.ok && Array.isArray(payload.students)) {
+          setStudents(payload.students as Profile[]);
+        } else {
+          const { data: studentsData } = await supabase.from('profiles').select('*').eq('role', 'student');
+          if (studentsData) setStudents(studentsData);
+        }
+      } else {
+        const { data: studentsData } = await supabase.from('profiles').select('*').eq('role', 'student');
+        if (studentsData) setStudents(studentsData);
+      }
 
       const { data: subjectsData } = await supabase.from('subjects').select('*').eq('teacher_id', userId);
       if (subjectsData) setSubjects(subjectsData);
 
-      const subjectIds = (subjectsData || []).map((s) => s.id);
-      if (subjectIds.length > 0) {
-        const { data: gradeData } = await supabase
-          .from('grades')
-          .select('id, score, subject_id, student_id, created_at, subjects(name)')
-          .in('subject_id', subjectIds)
-          .order('created_at', { ascending: false });
-        if (gradeData) setGrades(gradeData as GradeWithSubject[]);
-      }
+      if (accessToken) await loadGrades(accessToken);
     };
     load();
   }, [router]);
@@ -49,16 +78,29 @@ export default function TeacherGradesPage() {
     if (!studentId || !subjectId || !score) return;
     const value = Number(score);
     if (Number.isNaN(value) || value < 0 || value > 100) return alert('Score must be 0-100');
-    const { error } = await supabase.from('grades').insert({
-      student_id: studentId,
-      subject_id: Number(subjectId),
-      score: value,
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) return alert('Unauthorized');
+
+    const res = await fetch('/api/teacher/grades', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        studentId,
+        subjectId: Number(subjectId),
+        score: value,
+      }),
     });
-    if (error) return alert(error.message);
-    router.refresh();
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) return alert(payload.error || 'Failed to save grade');
+    await loadGrades(accessToken);
+    setScore('');
   };
 
-  const studentMap = useMemo(() => Object.fromEntries(students.map((s) => [s.id, s.full_name || s.id])), [students]);
+  const studentMap = useMemo(() => Object.fromEntries(students.map((s) => [s.id, formatStudentName(s)])), [students]);
 
   return (
     <div className="app-bg">
@@ -70,7 +112,7 @@ export default function TeacherGradesPage() {
             <div className="grid gap-3 md:grid-cols-3">
               <select className="select-field" value={studentId} onChange={(e) => setStudentId(e.target.value)}>
                 <option value="">{t('selectStudent')}</option>
-                {students.map((s) => <option key={s.id} value={s.id}>{s.full_name || s.id}</option>)}
+                {students.map((s) => <option key={s.id} value={s.id}>{formatStudentName(s)}</option>)}
               </select>
               <select className="select-field" value={subjectId} onChange={(e) => setSubjectId(e.target.value)}>
                 <option value="">{t('selectSubject')}</option>
@@ -94,8 +136,8 @@ export default function TeacherGradesPage() {
               <tbody>
                 {grades.map((g) => (
                   <tr key={g.id} className="border-t border-[color:var(--card-border)] zebra">
-                    <td className="px-4 py-3">{studentMap[g.student_id] || g.student_id}</td>
-                    <td className="px-4 py-3">{g.subjects?.[0]?.name || t('unknown')}</td>
+                    <td className="px-4 py-3">{studentMap[g.student_id] || '-'}</td>
+                    <td className="px-4 py-3">{getRelationName(g.subjects) || t('unknown')}</td>
                     <td className="px-4 py-3">{g.score}</td>
                     <td className="px-4 py-3">{new Date(g.created_at).toLocaleDateString()}</td>
                   </tr>

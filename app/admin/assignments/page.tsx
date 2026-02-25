@@ -74,9 +74,9 @@ export default function AdminAssignmentsPage() {
             </div>
           </section>
 
-          <div className="mt-6 space-y-3 fade-up delay-2">
+          <div className="mt-6 grid grid-cols-4 gap-3 fade-up delay-2">
             {items.map((a) => (
-              <div key={a.id} className="soft-panel soft-panel-muted">
+              <div key={a.id} className="soft-panel soft-panel-muted aspect-square min-h-0 p-3">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{a.title}</p>
                   <span className="tag">{a.subjects?.[0]?.name || '-'}</span>

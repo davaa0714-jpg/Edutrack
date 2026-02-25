@@ -10,6 +10,15 @@ import jsPDF from 'jspdf';
 interface GradeWithSubject extends Grade { subjects: { name: string }[]; }
 interface AttendanceWithSubject extends Attendance { subjects: { name: string }[]; }
 
+const getAttendanceStatusLabel = (status: Attendance['status']) => {
+  if (status === 'present') return '\u0418\u0440\u0441\u044d\u043d';
+  if (status === 'absent') return '\u0422\u0430\u0441\u0430\u043b\u0441\u0430\u043d';
+  if (status === 'late') return '\u0425\u043e\u0446\u043e\u0440\u0441\u043e\u043d';
+  if (status === 'sick') return '\u04e8\u0432\u0447\u0442\u044d\u0439';
+  if (status === 'excused') return '\u0427\u04e9\u043b\u04e9\u04e9\u0442\u044d\u0439';
+  return status;
+};
+
 export default function ReportsPage() {
   const { t } = useI18n();
   const [grades, setGrades] = useState<GradeWithSubject[]>([]);
@@ -46,7 +55,11 @@ export default function ReportsPage() {
     });
     doc.text(`${t('attendanceLabel')}:`, 10, 40 + grades.length * 10);
     attendance.forEach((a, i) => {
-      doc.text(`${a.subjects[0]?.name || t('unknown')} - ${a.date}: ${a.status}`, 10, 50 + grades.length * 10 + i * 10);
+      doc.text(
+        `${a.subjects[0]?.name || t('unknown')} - ${a.date}: ${getAttendanceStatusLabel(a.status)}`,
+        10,
+        50 + grades.length * 10 + i * 10
+      );
     });
     doc.save('report.pdf');
   };

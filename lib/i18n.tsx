@@ -132,11 +132,12 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguage] = useState<Language>(() => {
-    if (typeof window === 'undefined') return 'mn';
+  const [language, setLanguage] = useState<Language>('mn');
+
+  useEffect(() => {
     const saved = localStorage.getItem('edutrack_lang') as Language | null;
-    return saved === 'en' ? 'en' : 'mn';
-  });
+    if (saved === 'en') setLanguage('en');
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('edutrack_lang', language);

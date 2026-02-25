@@ -27,17 +27,19 @@ export default function TeacherDashboardPage() {
       if (profileData.role === 'student') return router.replace('/student/dashboard');
       if (profileData.role === 'admin') return router.replace('/admin/dashboard');
 
-      const { count: studentCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'student');
-      setStudents(studentCount || 0);
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) return;
 
-      const { count: subjectCount } = await supabase
-        .from('subjects')
-        .select('*', { count: 'exact', head: true })
-        .eq('teacher_id', userId);
-      setSubjects(subjectCount || 0);
+      const res = await fetch('/api/teacher/dashboard', {
+        cache: 'no-store',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const payload = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setStudents(Number(payload.studentCount) || 0);
+        setSubjects(Number(payload.subjectCount) || 0);
+      }
     };
     load();
   }, [router]);
@@ -57,7 +59,7 @@ export default function TeacherDashboardPage() {
 
           <section className="mt-6 stat-row fade-up delay-1">
             <div className="stat-card"><p className="text-sm">{t('subjects')}: <b>{subjects}</b></p></div>
-            <div className="stat-card"><p className="text-sm">{t('roleStudents')}: <b>{students}</b></p></div>
+            <Link href="/teacher/students" className="stat-card"><p className="text-sm">{t('roleStudents')}: <b>{students}</b></p></Link>
             <Link href="/teacher/attendance" className="stat-card"><p className="text-sm">{t('enterAttendance')}</p></Link>
             <Link href="/teacher/grades" className="stat-card"><p className="text-sm">{t('enterGrade')}</p></Link>
           </section>

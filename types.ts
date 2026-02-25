@@ -61,7 +61,7 @@ export interface ClassMembership {
   created_at: string;
 }
 
-export type AttendanceStatus = 'present' | 'absent' | 'late';
+export type AttendanceStatus = 'present' | 'absent' | 'late' | 'sick' | 'excused';
 export interface Attendance {
   id: number;
   student_id: string;

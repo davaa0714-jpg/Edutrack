@@ -8,6 +8,15 @@ import AppSidebar from '@/app/components/AppSidebar';
 
 type AttendanceWithSubject = Attendance & { subjects?: { name: string }[] | null };
 
+const getAttendanceStatusLabel = (status: Attendance['status']) => {
+  if (status === 'present') return '\u0418\u0440\u0441\u044d\u043d';
+  if (status === 'absent') return '\u0422\u0430\u0441\u0430\u043b\u0441\u0430\u043d';
+  if (status === 'late') return '\u0425\u043e\u0446\u043e\u0440\u0441\u043e\u043d';
+  if (status === 'sick') return '\u04e8\u0432\u0447\u0442\u044d\u0439';
+  if (status === 'excused') return '\u0427\u04e9\u043b\u04e9\u04e9\u0442\u044d\u0439';
+  return status;
+};
+
 export default function StudentAttendancePage() {
   const { t } = useI18n();
   const router = useRouter();
@@ -77,9 +86,9 @@ export default function StudentAttendancePage() {
                 ))}
               </select>
               <select className="select-field" value={status} onChange={(e) => setStatus(e.target.value as 'present' | 'absent' | 'late')}>
-                <option value="present">{t('present')}</option>
-                <option value="absent">{t('absent')}</option>
-                <option value="late">{t('late')}</option>
+                <option value="present">{getAttendanceStatusLabel('present')}</option>
+                <option value="absent">{getAttendanceStatusLabel('absent')}</option>
+                <option value="late">{getAttendanceStatusLabel('late')}</option>
               </select>
               <button className="btn-primary" onClick={submitAttendance}>{t('save')}</button>
             </div>
@@ -98,7 +107,7 @@ export default function StudentAttendancePage() {
                 {attendance.map((a) => (
                   <tr key={a.id} className="border-t border-[color:var(--card-border)] zebra">
                     <td className="px-4 py-3">{a.subjects?.[0]?.name || t('unknown')}</td>
-                    <td className="px-4 py-3">{a.status}</td>
+                    <td className="px-4 py-3">{getAttendanceStatusLabel(a.status)}</td>
                     <td className="px-4 py-3">{a.date}</td>
                   </tr>
                 ))}

@@ -41,7 +41,7 @@ export default function AdminRolesPage() {
               <thead className="table-head">
                 <tr>
                   <th className="px-4 py-3 text-left">{t('fullName')}</th>
-                  <th className="px-4 py-3 text-left">{t('email')}</th>
+                  <th className="px-4 py-3 text-left">Phone</th>
                   <th className="px-4 py-3 text-left">{t('role')}</th>
                 </tr>
               </thead>
@@ -49,7 +49,7 @@ export default function AdminRolesPage() {
                 {users.map((u) => (
                   <tr key={u.id} className="border-t border-[color:var(--card-border)] zebra">
                     <td className="px-4 py-3">{u.full_name || '-'}</td>
-                    <td className="px-4 py-3 text-xs">{u.id}</td>
+                    <td className="px-4 py-3">{u.phone || '-'}</td>
                     <td className="px-4 py-3">
                       <select className="select-field" value={u.role} onChange={(e) => updateRole(u.id, e.target.value as Role)}>
                         <option value="student">{t('roleStudents')}</option>

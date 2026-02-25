@@ -26,7 +26,12 @@ export default function ProfilePage() {
 
       setEmail(user?.email || '');
 
-      const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
       if (!data) return;
 
       const profileData = data as Profile;
@@ -57,10 +62,36 @@ export default function ProfilePage() {
       return;
     }
 
-    const { data: publicData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+    const { data: publicData } =
+      supabase.storage.from('avatars').getPublicUrl(filePath);
+
     const nextUrl = publicData?.publicUrl || '';
+    if (!nextUrl) {
+      setIsUploading(false);
+      alert('Avatar URL oldsongui');
+      return;
+    }
+
     setAvatarUrl(nextUrl);
+
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({
+        avatar_url: nextUrl,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', profile.id);
+
     setIsUploading(false);
+
+    if (updateError) {
+      alert(`Avatar хадгалах үед алдаа: ${updateError.message}`);
+      return;
+    }
+
+    setProfile((prev) =>
+      prev ? { ...prev, avatar_url: nextUrl } : prev
+    );
   };
 
   const saveProfile = async () => {
@@ -96,97 +127,195 @@ export default function ProfilePage() {
           }
         : prev
     );
+
     alert('Profile shinechlegdlee');
   };
 
   return (
-    <div className="app-bg">
-      <div className="dash-shell">
+    <div className="app-bg profile-page min-h-screen">
+      <div className="dash-shell profile-shell">
         <AppSidebar />
-        <main className="dash-main">
-          <header className="dash-header fade-up">
+
+        <main className="dash-main profile-main">
+          
+          {/* HEADER + Toggle баруун дээд */}
+          <header className="dash-header profile-header fade-up flex items-start justify-between">
+            
+            {/* Зүүн талын мэдээлэл */}
             <div>
-              <p className="text-xs uppercase tracking-[0.28em] text-muted">{t('profile')}</p>
-              <div className="mt-2 flex items-center gap-3">
-                <div className="h-12 w-12 overflow-hidden rounded-full border border-[color:var(--glass-border)] bg-[color:var(--surface)]">
+              <p className="profile-kicker text-xs uppercase tracking-[0.28em]">
+                {t('profile')}
+              </p>
+
+              <div className="mt-4 flex items-center gap-3">
+                <div
+                  className="profile-avatar-sm profile-floating-avatar shrink-0 overflow-hidden rounded-full border"
+                  style={{
+                    width: 48,
+                    height: 48,
+                    minWidth: 48,
+                    minHeight: 48,
+                    maxWidth: 48,
+                    maxHeight: 48,
+                  }}
+                >
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+                    <img
+                      src={avatarUrl}
+                      alt="avatar"
+                      className="block"
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                      }}
+                    />
                   ) : (
-                    <div className="grid h-full w-full place-items-center text-xs text-muted">No avatar</div>
+                    <div className="grid h-full w-full place-items-center text-xs text-muted">
+                      No avatar
+                    </div>
                   )}
                 </div>
-                <h1 className="text-2xl font-semibold">{fullName || t('roleStudents')}</h1>
+
+                <h1 className="profile-title text-xl font-semibold md:text-[42px]">
+                  {fullName || t('roleStudents')}
+                </h1>
               </div>
-              <p className="mt-2 text-sm text-muted">{t('activeStudent')}</p>
+
+              <p className="mt-3 text-sm text-[color:rgba(255,255,255,0.78)]">
+                {t('activeStudent')}
+              </p>
             </div>
-            <div className="flex items-center gap-2">
+
+            {/* 👉 ToggleGroup баруун дээд буланд */}
+            <div className="profile-toggle-wrap">
               <ToggleGroup />
             </div>
+
           </header>
 
-          <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr] fade-up delay-1">
-            <div className="soft-panel">
-              <h2 className="text-sm font-semibold">{t('summary')}</h2>
-              <div className="mt-4 space-y-3 text-sm">
+          {/* Content Section */}
+          <section className="mt-2 grid gap-4 profile-grid fade-up delay-1 text-[color:var(--ink)]">
+            
+            <div className="soft-panel profile-panel profile-summary-panel">
+              <h2 className="text-[34px] font-semibold leading-none">
+                {t('summary')}
+              </h2>
+
+              <div className="mt-4 space-y-3 text-base">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted">{t('email')}</span>
-                  <span className="font-semibold">{email || '--'}</span>
+                  <span className="text-[color:rgba(255,255,255,0.82)]">
+                    {t('email')}
+                  </span>
+                  <span className="font-semibold text-white">
+                    {email || '--'}
+                  </span>
                 </div>
+
                 <div className="flex items-center justify-between">
-                  <span className="text-muted">{t('role')}</span>
-                  <span className="tag">{profile?.role || '--'}</span>
+                  <span className="text-[color:rgba(255,255,255,0.82)]">
+                    {t('role')}
+                  </span>
+                  <span className="tag profile-role-tag">
+                    {profile?.role || '--'}
+                  </span>
                 </div>
+
                 <div className="flex items-center justify-between">
-                  <span className="text-muted">Phone</span>
-                  <span className="font-semibold">{phone || '--'}</span>
+                  <span className="text-[color:rgba(255,255,255,0.82)]">
+                    Phone
+                  </span>
+                  <span className="font-semibold text-white">
+                    {phone || '--'}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="soft-panel">
-              <h2 className="text-sm font-semibold">Edit profile</h2>
+            <div className="soft-panel profile-panel overflow-hidden">
+              <h2 className="text-[40px] font-semibold leading-none">
+                Edit profile
+              </h2>
+
               <div className="mt-4 grid gap-3">
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 overflow-hidden rounded-full border border-[color:var(--glass-border)] bg-[color:var(--surface)]">
+                <div className="flex flex-wrap items-center gap-4 min-w-0">
+                  <div
+                    className="profile-avatar shrink-0 overflow-hidden rounded-full border"
+                    style={{ width: 64, height: 64 }}
+                  >
                     {avatarUrl ? (
-                      <img src={avatarUrl} alt="avatar" className="h-full w-full object-cover" />
+                      <img
+                        src={avatarUrl}
+                        alt="avatar"
+                        className="block"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                        }}
+                      />
                     ) : (
-                      <div className="grid h-full w-full place-items-center text-xs text-muted">No avatar</div>
+                      <div className="grid h-full w-full place-items-center text-xs text-muted">
+                        No avatar
+                      </div>
                     )}
                   </div>
-                  <input type="file" accept="image/*" onChange={handleAvatarUpload} className="input-field" />
+
+                  <div className="min-w-0 flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="input-field profile-input w-full max-w-full"
+                    />
+                  </div>
                 </div>
-                {isUploading && <p className="text-xs text-muted">Avatar uploading...</p>}
+
+                {isUploading && (
+                  <p className="text-xs text-[color:rgba(255,255,255,0.75)]">
+                    Avatar uploading...
+                  </p>
+                )}
+
                 <input
-                  className="input-field"
+                  className="input-field profile-input w-full max-w-full"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder={t('fullName')}
                 />
+
                 <input
-                  className="input-field"
+                  className="input-field profile-input w-full max-w-full"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="Phone"
                 />
+
                 <input
-                  className="input-field"
+                  className="input-field profile-input w-full max-w-full"
                   value={avatarUrl}
                   onChange={(e) => setAvatarUrl(e.target.value)}
                   placeholder="Avatar URL"
                 />
+
                 <textarea
-                  className="input-field"
+                  className="input-field profile-input w-full max-w-full"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Bio"
                   rows={4}
                 />
-                <button onClick={saveProfile} className="btn-primary" disabled={isSaving || isUploading}>
+
+                <button
+                  onClick={saveProfile}
+                  className="btn-primary profile-save-btn"
+                  disabled={isSaving || isUploading}
+                >
                   {isSaving ? 'Saving...' : t('save')}
                 </button>
               </div>
             </div>
+
           </section>
         </main>
       </div>

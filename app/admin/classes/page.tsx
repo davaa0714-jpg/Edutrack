@@ -13,6 +13,11 @@ export default function AdminClassesPage() {
   const [gradeLevel, setGradeLevel] = useState('');
   const [teacherId, setTeacherId] = useState('');
 
+  const getTeacherName = (id: string | null) => {
+    if (!id) return '-';
+    return teachers.find((t) => t.id === id)?.full_name || '-';
+  };
+
   useEffect(() => {
     const load = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -57,7 +62,7 @@ export default function AdminClassesPage() {
               <input className="input-field" placeholder="Grade level" value={gradeLevel} onChange={(e) => setGradeLevel(e.target.value)} />
               <select className="select-field" value={teacherId} onChange={(e) => setTeacherId(e.target.value)}>
                 <option value="">Homeroom teacher</option>
-                {teachers.map((t) => <option key={t.id} value={t.id}>{t.full_name || t.id}</option>)}
+                {teachers.map((t) => <option key={t.id} value={t.id}>{t.full_name || t.phone || 'Teacher'}</option>)}
               </select>
               <button className="btn-primary" onClick={createClass}>Create class</button>
             </div>
@@ -77,7 +82,7 @@ export default function AdminClassesPage() {
                   <tr key={c.id} className="border-t border-[color:var(--card-border)] zebra">
                     <td className="px-4 py-3">{c.name}</td>
                     <td className="px-4 py-3">{c.grade_level || '-'}</td>
-                    <td className="px-4 py-3 text-xs">{c.homeroom_teacher_id || '-'}</td>
+                    <td className="px-4 py-3">{getTeacherName(c.homeroom_teacher_id)}</td>
                   </tr>
                 ))}
               </tbody>

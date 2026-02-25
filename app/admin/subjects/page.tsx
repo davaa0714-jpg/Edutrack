@@ -14,6 +14,11 @@ export default function AdminSubjectsPage() {
   const [name, setName] = useState('');
   const [teacherId, setTeacherId] = useState('');
 
+  const getTeacherName = (id: string | null) => {
+    if (!id) return '-';
+    return teachers.find((tch) => tch.id === id)?.full_name || '-';
+  };
+
   useEffect(() => {
     const load = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -71,7 +76,7 @@ export default function AdminSubjectsPage() {
               <select className="select-field" value={teacherId} onChange={(e) => setTeacherId(e.target.value)}>
                 <option value="">{t('roleTeachers')}</option>
                 {teachers.map((tch) => (
-                  <option key={tch.id} value={tch.id}>{tch.full_name || tch.id}</option>
+                  <option key={tch.id} value={tch.id}>{tch.full_name || tch.phone || 'Teacher'}</option>
                 ))}
               </select>
               <button className="btn-primary" onClick={createSubject}>{t('save')}</button>
@@ -83,14 +88,14 @@ export default function AdminSubjectsPage() {
               <thead className="table-head">
                 <tr>
                   <th className="px-4 py-3 text-left">{t('subject')}</th>
-                  <th className="px-4 py-3 text-left">{t('id')}</th>
+                  <th className="px-4 py-3 text-left">{t('roleTeachers')}</th>
                 </tr>
               </thead>
               <tbody>
                 {subjects.map((s) => (
                   <tr key={s.id} className="border-t border-[color:var(--card-border)] zebra">
                     <td className="px-4 py-3">{s.name}</td>
-                    <td className="px-4 py-3 text-xs">{s.teacher_id || '-'}</td>
+                    <td className="px-4 py-3">{getTeacherName(s.teacher_id || null)}</td>
                   </tr>
                 ))}
               </tbody>

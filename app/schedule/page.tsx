@@ -27,9 +27,9 @@ export default function SchedulePage() {
             </div>
           </header>
 
-          <section className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3 fade-up delay-1">
+          <section className="mt-6 grid grid-cols-4 gap-3 fade-up delay-1">
             {items.map((item) => (
-              <div key={item.time} className="soft-panel">
+              <div key={item.time} className="soft-panel aspect-square min-h-0 p-3">
                 <p className="text-xs uppercase tracking-[0.22em] text-muted">{item.time}</p>
                 <h3 className="mt-2 text-lg font-semibold">{item.title}</h3>
                 <p className="mt-2 text-sm text-muted">{item.room}</p>

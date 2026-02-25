@@ -6,7 +6,8 @@ import { Class, Schedule, Subject } from '@/types';
 import { useI18n } from '@/lib/i18n';
 import AppSidebar from '@/app/components/AppSidebar';
 
-type ScheduleWithMeta = Schedule & { subjects?: { name: string }[] | null; classes?: { name: string }[] | null };
+type RelationName = { name: string } | { name: string }[] | null | undefined;
+type ScheduleWithMeta = Schedule & { subjects?: RelationName; classes?: RelationName };
 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function AdminSchedulePage() {
@@ -21,6 +22,18 @@ export default function AdminSchedulePage() {
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [room, setRoom] = useState('');
+
+  const getRelationName = (value: RelationName) => {
+    if (!value) return null;
+    if (Array.isArray(value)) return value[0]?.name || null;
+    return value.name || null;
+  };
+
+  const getSubjectName = (item: ScheduleWithMeta) =>
+    getRelationName(item.subjects) || subjects.find((s) => s.id === item.subject_id)?.name || t('unknown');
+
+  const getClassName = (item: ScheduleWithMeta) =>
+    getRelationName(item.classes) || classes.find((c) => c.id === item.class_id)?.name || '-';
 
   useEffect(() => {
     const load = async () => {
@@ -102,12 +115,12 @@ export default function AdminSchedulePage() {
             <button className="btn-primary mt-4" onClick={createSchedule}>{t('createSchedule')}</button>
           </section>
 
-          <div className="mt-6 space-y-3 fade-up delay-2">
+          <div className="mt-6 grid grid-cols-4 gap-3 fade-up delay-2">
             {items.map((s) => (
-              <div key={s.id} className="soft-panel soft-panel-muted">
+              <div key={s.id} className="soft-panel soft-panel-muted aspect-square min-h-0 p-3">
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold">{s.subjects?.[0]?.name || t('unknown')}</p>
-                  <span className="tag">{s.classes?.[0]?.name || '-'}</span>
+                  <p className="font-semibold">{getSubjectName(s)}</p>
+                  <span className="tag">{getClassName(s)}</span>
                 </div>
                 <p className="text-sm text-muted">{days[(s.day_of_week || 1) - 1]} · {s.start_time} - {s.end_time} · {s.room || 'Room'}</p>
               </div>
